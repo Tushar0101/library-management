@@ -1,0 +1,713 @@
+#include<iostream.h>
+#include<ctype.h>
+#include<fstream.h>
+#include<process.h>
+#include<stdio.h>
+#include<conio.h>
+#include<string.h>
+
+void login();
+void confirm();
+void login1();
+void intro();
+void options();
+void moviemenu();
+class user;
+char * password();
+char h[100], j[100];
+
+class movie
+{
+	char name[100], cat[100], star[10];
+	float imdb, rent;
+
+	public:
+	void accept();
+	void display();
+	float retrent();
+	int retname(char[]);
+	int retimdb(float);
+	int retrate(char[]);
+	int retcat(char[]);
+
+};
+
+class user
+{
+	char name[200];
+	float amt;
+	int novid ;
+	char userid[200];
+	char pass[200];
+
+	public:
+	user() { novid =0; amt =0;}
+	void cardinfo();
+	void addmoney(long);
+	void create();
+	int compare(user);
+	int retuserid(char[]);
+	int retpass(char[]);
+	long balance (long);
+	void isadmin( char []);
+};
+
+										// Class Functions
+/*void isadmin :: user(char n[])
+{
+	if(strcmpi("Tushar", n) ==0 || strcmpi("Keshav" , n) ==0)
+	return 1;
+	else
+	return 0;
+} */
+
+float movie :: retrent()
+{
+	return rent;
+}
+
+void movie :: accept()
+{
+	cout<<"Enter Name : ";
+	gets(name);
+	cout<<endl<<"Enter Category : ";
+	gets(cat);
+	cout<<endl<<"Enter Star Rating : ";
+	gets(star);
+	cout<<endl<<"Enter IMDB rating : ";
+	cin>>imdb;
+	cout<<endl;
+	cout<<"Enter Rent: ";
+	cin>>rent;
+	cout<<endl;
+}
+
+void movie :: display()
+{
+	cout<<"Name : "<<name<<endl;
+	cout<<"Category : "<<cat<<endl;
+	cout<<"Star Rating : "<<star<<endl;
+	cout<<"IMDB Rating : "<<imdb<<endl;
+	cout<<"Rent: "<<rent<<endl;
+}
+
+
+int movie :: retname(char n[])
+{
+	if(strcmpi(n,name)==0)
+	return 1;
+	else
+	return 0;
+}
+
+int movie :: retcat(char n[])
+{
+	if(strcmpi(n,cat)==0)
+	return 1;
+	else
+	return 0;
+}
+
+int movie :: retimdb(float n)
+{
+	if(n==imdb)
+	return 1;
+	else
+	return 0;
+}
+
+int movie :: retrate(char n[])
+{
+	if(strcmpi(n, star)==0)
+	return 1;
+	else
+	return 0;
+}
+
+void user :: cardinfo()
+{
+	cout<<"UserID : "<<userid<<endl;
+	cout<<"Name : "<<name<<endl;
+	cout<<"Balance : Rs."<<amt<<endl;
+	cout<<"Movie Rented : "<<novid<<endl;
+}
+
+long user :: balance( long rent )
+{
+
+	amt -= rent;
+	novid++;
+	return amt;
+}
+
+void user :: addmoney(long n)
+{
+	amt+= n;
+}
+
+int user :: retuserid(char n[])
+{
+	return !strcmpi(userid, n);
+}
+
+int user :: retpass(char n[])
+{
+	if(strcmpi(pass, n) == 0)
+	return 1;
+	else
+	return 0;
+}
+
+void user :: create()
+{
+	textcolor(11);
+	char pass2[200];
+
+	gotoxy(30,10);
+	cprintf("Enter Full Name: ");
+	gets(name);
+	gotoxy(30, 12);
+	cprintf("Enter Username: ");
+	gets(userid);
+	reentry :
+	gotoxy(30, 13);
+	cprintf("Enter Password: ");
+	strcpy(pass,password());
+	cout<<endl;
+	gotoxy(28, 14);
+	cprintf("Retype Password: ");
+	strcpy(pass2, password());
+	if(strcmpi(pass, pass2)!=0)
+	{   cout<<endl;
+		gotoxy(20, 15);
+		cprintf("Passwords don't match, enter again!");
+		cout<<endl<<endl;
+		goto reentry;
+	}
+	else
+	{
+		cout<<endl;
+		gotoxy(24,15);
+		textcolor(4);
+		cprintf("Account Creation Complete.");
+	}
+}
+												  // Password Functions
+char* password()
+{
+	char s[200] , ch;
+	int i;
+	entry :
+	i=0;
+	do
+	{
+		ch = getch();
+		if(ch=='?' || ch == 13)
+		{
+		}
+		else if(ch==8)
+		{
+			cout<<"\b \b";
+			s[--i]='\0';
+		}
+		else
+		{
+		cout<<"*";
+		s[i++]= ch;
+		}
+	}while(ch!=13);
+	s[i]='\0';
+	if(strlen(s)<6)
+	{
+		gotoxy(20,15);
+		cprintf("Password too short! Please try again");
+		goto entry;
+	}
+	return s;
+}
+
+
+void main()
+{
+	clrscr();
+	intro :
+	intro();
+	fstream create, login;
+	user u, uc;
+	char ch;
+	gotoxy(30, 18);
+	cprintf("Enter L or C :  ");
+	cin>>ch;
+	clrscr();
+	switch(ch)
+	{
+
+	case 'c': 	create.open("create" , ios::binary| ios::app);
+				u.create();
+				create.write((char*) &u, sizeof(u));
+				create.close();
+				getch();
+				goto intro;
+
+	case 'l':	login.open("Create" , ios:: binary | ios:: in);
+				while(!login.eof())
+				{
+				login.read((char*) &u , sizeof(u));
+				if(login.eof()) break;
+
+					char c[200], p[200];
+					textcolor(11);
+					cout<<endl;
+					gotoxy(30, 12);
+					cprintf("Enter Username: ");
+					gets(c);
+					gotoxy(30, 13);
+					cprintf("Enter Password: ");
+					strcpy(p,password());
+					while(login.read((char*)&u , sizeof(u)))
+						{
+							if((u.retuserid(c)==1) && (u.retpass(p)==1)) break;
+						}
+					if(u.retuserid(c) == 1)
+					{
+						if(u.retpass(p) == 1)
+						{
+							strcpy(h,c);
+							strcpy(j,p);
+							textcolor(2);
+							cout<<endl;
+							gotoxy(34,15);
+							cprintf("Login Complete");
+							getch();
+							options();
+							cout<<endl;
+							break;
+						}
+						else
+						{
+							textcolor(4);
+							cout<<endl;
+							gotoxy(27,15);
+							cprintf("The credentials don't match.");
+							getch();
+							goto intro;
+						}
+					}
+					login.close();
+					break;
+				};
+	}
+	getch();
+
+}
+
+void options()
+{
+
+	clrscr();
+	options :
+	textcolor(15);
+	gotoxy(32, 4);
+	char ch;
+	fstream f,file,temp;
+	user u, u1;
+	cprintf("TG Video Library");
+
+
+	do
+	{
+
+		clrscr();
+		gotoxy(33,10);
+		cprintf("1. ADD MONEY ");
+		gotoxy(32,11);
+		cprintf("2. RENT A MOVIE");
+		gotoxy(29,12);
+		cprintf("3. DISPLAY CARD INFO");
+		gotoxy(31,13);
+		cprintf("4. DELETE ACCOUNT");
+		gotoxy(36,14);
+		cprintf("5. EXIT");
+		gotoxy(30,16);
+		cout<<endl<<"ENTER CHOICE: ";
+		cin>>ch;
+
+						f.open("Create" , ios :: binary | ios:: in);
+						while(f.read((char*)&u , sizeof(u)))
+						{
+							if((u.retuserid(h)==1) && (u.retpass(j)==1)) break;
+						}
+
+		switch(ch)
+		{
+			case '1':   float x;
+							cout<<"Enter the amount you want to add : ";
+							cin>>x;
+							u.addmoney(x);
+							fstream temp;
+							temp.open("Temp" , ios:: binary | ios :: out);
+							while(f.read((char*)&u1 , sizeof(u1)))
+							{
+								if((u1.retuserid(h)==1) && (u1.retpass(j)==1))
+								continue;
+								else
+								temp.write((char*)&u1, sizeof(u1));
+							}
+							temp.write((char*)&u, sizeof(u));
+							temp.close();
+							f.close();
+							remove("Create");
+							rename("Temp" , "Create");
+
+						break;
+			case '2':   moviemenu();
+						break;
+
+			case '3':   u.cardinfo();
+						getch();
+						break;
+
+			case '4':   char n[200];
+						int flag=0;
+						cout<<"Enter User ID: ";
+						gets(n);
+						file.open("Create" , ios:: binary | ios::in);
+						temp.open("temp" , ios:: binary | ios::out);
+						while(!file.eof())
+						{
+							file.read((char*) &u , sizeof(u));
+							if(file.eof()) break;
+
+							if(u.retuserid(n)==0)
+							{
+								temp.write((char*) &u , sizeof(u));
+								flag=1;
+							}
+						}
+						file.close();
+						temp.close();
+						remove("Create");
+						rename("Temp" , "Create");
+						if(flag==0) cout<<"User Not Found.";
+						goto options;
+
+			case '|': 	cout<<"1. Add \n 2. Dispaly \n 3. Terminate";
+						char ch;
+						cout<<endl<<"Enter Choice: ";
+						cin>>ch;
+						movie m;
+
+						switch (ch)
+						{
+			case'1':    file.open("Movie" , ios::binary | ios::out );
+						m.accept();
+						file.write((char*) &m , sizeof(m));
+						file.close();
+						break;
+
+			case'2':    file.open("Movie" , ios:: binary | ios::in);
+						while(!file.eof())
+						{
+							file.read((char*) &m , sizeof(m));
+							if(file.eof())
+							break;
+							m.display();
+						}
+						file.close();
+						break;
+			}
+
+		}
+
+	}while(ch!='5');
+
+
+
+}
+
+void moviemenu()
+{
+	clrscr();
+	movie m;
+
+	fstream file,temp;
+	char ch , b[200];
+	char n[100];
+	long a;
+	int flag;
+
+	do
+	{
+		cout<<" 1. Display all Records \n 2. Search by Category \n 3. Search by IMDB \n 4. Search by Name \n 5. Exit ";
+		cout<<endl<<"Enter Choice : ";
+		cin>>ch;
+
+		switch(ch)
+		{
+
+			case'1':    file.open("Movie" , ios:: binary | ios::in);
+						while(!file.eof())
+						{
+							file.read((char*) &m , sizeof(m));
+							if(file.eof())
+							break;
+							m.display();
+						}
+						file.close();
+						confirm();
+						break;
+
+			case'2':    flag=0;
+						cout<<"Enter Category : ";
+						gets(n);
+						file.open("Movie" , ios:: binary | ios::in);
+						while(!file.eof())
+						{
+							file.read((char*) &m , sizeof(m));
+							if(file.eof()) break;
+
+							if(m.retcat(n)==1)
+							{
+								m.display();
+								flag=1;
+							}
+						}
+						file.close();
+						if(flag==0) cout<<"Category Not Found";
+						confirm();
+						break;
+
+			case'3':    flag=0;
+						cout<<"Enter IMDB Rating : ";
+						cin>>a;
+						file.open("Movie" , ios:: binary | ios::in);
+						while(!file.eof())
+						{
+							file.read((char*) &m , sizeof(m));
+							if(file.eof()) break;
+
+							if(m.retimdb(a)==1)
+							{
+								m.display();
+								flag=1;
+							}
+						}
+						file.close();
+						if(flag==0) cout<<"Movie not Found";
+						confirm();
+						break;
+
+			case'4':    flag=0;
+						cout<<"Enter Name : ";
+						gets(n);
+						file.open("Movie" , ios:: binary | ios::in);
+						while(!file.eof())
+						{
+							file.read((char*) &m , sizeof(m));
+							if(file.eof()) break;
+
+							if(m.retname(n)==1)
+							{
+								m.display();
+								flag=1;
+							}
+						}
+						file.close();
+						if(flag==0) cout<<"Movie Not Found";
+						confirm();
+						break;
+
+			case'5': 	break;
+		}
+	}while(ch!='5');
+
+}
+
+void confirm()
+{
+	fstream file,g,f;
+	confirm :
+	movie m;
+	user u,u1;
+	char n[100];
+	long y, bal;
+	char x[200];
+	cout<<"Enter the name of the movie you want to rent : ";
+	gets(x);
+	file.open("Movie" , ios:: binary | ios::  in);
+	while(!file.eof())
+	{
+		f.open("Create" , ios::binary | ios::in);
+								while(f.read((char*)&u , sizeof(u)))
+						{
+							if((u.retuserid(h)==1) && (u.retpass(j)==1)) break;
+						}
+		file.read((char*) &m ,sizeof(m));
+		if(file.eof()) break;
+
+		if(m.retname(x) == 1)
+		{
+			y = m.retrent();
+			bal =u.balance(y);
+			cout<<"Thanks for purchase! Have a Good Day!"<<endl;
+			cout<<"Your balance is Rs."<<bal<<endl;
+			fstream temp;
+
+							temp.open("Temp" , ios:: binary | ios :: out);
+							while(f.read((char*)&u1 , sizeof(u1)))
+							{
+								if((u1.retuserid(h)==1) && (u1.retpass(j)==1))
+								continue;
+								else
+								temp.write((char*)&u1, sizeof(u1));
+							}
+							temp.write((char*)&u, sizeof(u));
+							temp.close();
+							f.close();
+							remove("Create");
+							rename("Temp" , "Create");
+
+			break;
+
+		}
+		else
+		{
+			cout<<"Movie not found. Try Again"<<endl;
+			goto confirm;
+		}
+	}
+
+}
+
+
+void intro()
+{
+	clrscr();
+	int a;
+	char b[2];
+	b[0] = 219;
+	b[1] = '\0';
+	textcolor(15);
+	for( int j= 35; j<45 ; j++)
+	{
+		gotoxy(j,2);
+		cprintf(b);
+	}
+	for(int n=2; n<7 ; n++)
+	{
+	gotoxy(39,n);
+	cprintf(b);
+	}
+	for( n=2; n<7 ; n++)
+	{
+	gotoxy(40,n);
+	cprintf(b);
+	}
+	for(n=4; n<9 ; n++)
+	{
+	gotoxy(42,n);
+	cprintf(b);
+	}
+	for( n=4; n<9 ; n++)
+	{
+	gotoxy(43,n);
+	cprintf(b);
+	}
+	gotoxy(44,4);
+	cprintf(b);
+	gotoxy(45,4);
+	cprintf(b);
+	gotoxy(44,8);
+	cprintf(b);
+	gotoxy(45,8);
+	cprintf(b);
+	gotoxy(46,8);
+	cprintf(b);
+	gotoxy(47,8);
+	cprintf(b);
+	gotoxy(47,7);
+	cprintf(b);
+	gotoxy(46,7);
+	cprintf(b);
+	gotoxy(47,4);
+	cprintf(b);
+	gotoxy(46,4);
+	cprintf(b);
+	for(n=34 ; n<49 ;n++)
+	{
+	gotoxy(n,10);
+	cprintf(b);
+	}
+	gotoxy(35, 12) ;
+	textcolor(11);
+	cprintf("VIDEO LIBRARY");
+	gotoxy(37 , 13);
+	//cprintf("SYSTEMS");
+
+	gotoxy(29, 14);
+	textcolor(13 + 128);
+	cprintf("Press any key to continue.");
+
+
+	textcolor(15);
+	char c[2];
+	int g;
+	g= 001;
+	c[0] = g;
+	c[1] = '\0';
+	gotoxy(35,22);
+	cprintf("Version 1.0 ");
+	cprintf(c);
+	gotoxy(24,23);
+	cprintf("Developers: Tushar Jain & Keshav Garg");
+	gotoxy(31,24);
+	getch();
+	login();
+}
+
+void login()
+{
+
+	clrscr();
+	char c[2];
+	c[0] = char(205);
+	c[1] = '\0';
+
+	textcolor(15);
+	for(int i=30; i<36 ; i++)
+	{
+		gotoxy(i,11);
+		cprintf(c);
+		gotoxy(i,13);
+		cprintf(c);
+	}
+
+	gotoxy(32, 4);
+	cprintf("TG Video Library");
+	gotoxy(24, 8);
+	cprintf("Click");
+	gotoxy(30, 8);
+	textcolor(11);
+	cprintf("CREATE");
+	gotoxy(36, 8);
+	textcolor(15);
+	cprintf(" if you are a new user.");
+	gotoxy( 30 ,12);
+	textcolor(15);
+	cprintf("CREATE");
+
+	for( i=45; i<=49 ; i++)
+	{
+		gotoxy(i,11);
+		cprintf(c);
+		gotoxy(i,13);
+		cprintf(c);
+	}
+
+
+	gotoxy( 45 ,12);
+	cprintf("LOGIN");
+
+}
+
+
